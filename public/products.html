@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Collection — CloudCart</title>
+  <meta name="description" content="Explore our edited hardware collection of acoustics, desk setup, and mobile tools." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="products">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <div class="container">
+        <header class="page-hero">
+          <p class="section__kicker">Studio Catalogue</p>
+          <h1>The Collection</h1>
+          <p class="lede">A curated flagship collection of 60 precision hardware instruments engineered for next-generation listening, computing, and high-performance workflows.</p>
+        </header>
+
+        <!-- Advanced Filter & Search Toolbar -->
+        <div class="toolbar">
+          <div class="search-input-wrap">
+            <i data-lucide="search"></i>
+            <input class="input" id="product-search" type="search" placeholder="Search by name, spec, or category..." />
+            <button class="search-clear-btn" id="search-clear" type="button" aria-label="Clear search">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          
+          <div class="toolbar-controls">
+            <div style="min-width: 190px;">
+              <select class="select" id="product-sort" aria-label="Sort products">
+                <option value="featured">Featured Selection</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Top Customer Rated</option>
+              </select>
+            </div>
+            
+            <div class="view-toggle" role="group" aria-label="Layout view mode">
+              <button class="view-toggle-btn active" id="view-grid" type="button" aria-label="Grid view">
+                <i data-lucide="grid"></i>
+              </button>
+              <button class="view-toggle-btn" id="view-list" type="button" aria-label="List view">
+                <i data-lucide="list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category & Quick Filter Chips -->
+        <div class="filters-bar" id="category-filters" role="group" aria-label="Categories"></div>
+
+        <!-- Results Counter & Status -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:0.82rem;color:var(--text-tertiary);">
+          <span id="results-count">Displaying catalogue objects</span>
+          <span style="font-family:var(--font-mono);color:var(--neon);">● All Items Live</span>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid" id="product-grid"></div>
+      </div>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>
