@@ -1,7 +1,6 @@
 {
   "version": 2,
   "name": "cloudcart",
-  "public": false,
   "cleanUrls": true,
   "routes": [
     {
