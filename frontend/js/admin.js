@@ -222,8 +222,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderStats(products, orders);
       renderTable(products);
       renderOrders(orders, products);
+      await renderAiInsights(products, orders);
     } catch (err) {
       App.toast(err.message, "error");
+    }
+  };
+
+  const renderAiInsights = async (products, orders) => {
+    const healthEl = document.getElementById("ai-health-pct");
+    const summaryEl = document.getElementById("ai-exec-summary");
+    const chipsEl = document.getElementById("ai-restock-chips");
+    if (!summaryEl || !chipsEl) return;
+
+    try {
+      const insights = await API.getAiInsights({ type: "admin", orders });
+      if (!insights) return;
+
+      if (healthEl) {
+        healthEl.textContent = `${insights.inventoryHealthPct}%`;
+        healthEl.style.color = insights.inventoryHealthPct > 80 ? "var(--neon)" : "var(--warning)";
+      }
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `<strong>Aether Diagnosis:</strong> ${App.escape(insights.executiveSummary)}`;
+      }
+
+      if (chipsEl && Array.isArray(insights.restockUrgencyList)) {
+        if (!insights.restockUrgencyList.length) {
+          chipsEl.innerHTML = `<span style="font-size:0.8rem;color:var(--text-tertiary);">Zero immediate restock alerts. All 60 SKUs are nominal.</span>`;
+        } else {
+          chipsEl.innerHTML = insights.restockUrgencyList.map((item) => `
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:0.82rem;">
+              <span class="product-badge ${item.urgency === 'CRITICAL' ? 'product-badge--out' : 'product-badge--low'}">${item.urgency}</span>
+              <div>
+                <strong style="color:var(--text-primary);display:block;font-size:0.85rem;">${App.escape(item.name)}</strong>
+                <span style="font-size:0.72rem;color:var(--text-secondary);font-family:var(--font-mono);">Stock: ${item.stock} · Velocity: ${item.demandScore}</span>
+              </div>
+              <button class="btn btn--cyan btn--small" type="button" data-ai-restock="${App.escape(item.id)}" data-units="${item.suggestedReorderUnits}" style="height:28px;padding:0 8px;font-size:0.72rem;margin-left:auto;">
+                +${item.suggestedReorderUnits} Units
+              </button>
+            </div>
+          `).join("");
+        }
+      }
+      App.refreshIcons();
+    } catch (e) {
+      console.warn("AI insights load error", e);
     }
   };
 
@@ -290,6 +334,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderTable(cachedProducts);
     });
   }
+
+  // Handle AI Restock 1-click execution
+  document.addEventListener("click", async (event) => {
+    const aiBtn = event.target.closest("[data-ai-restock]");
+    if (aiBtn) {
+      const id = aiBtn.getAttribute("data-ai-restock");
+      const units = Number(aiBtn.getAttribute("data-units")) || 15;
+      const product = cachedProducts.find((p) => p.id === id);
+      if (product) {
+        aiBtn.disabled = true;
+        aiBtn.innerHTML = `<i data-lucide="loader"></i> Restocking...`;
+        App.refreshIcons();
+        try {
+          const nextStock = product.stock + units;
+          await API.updateProductStock(id, nextStock);
+          App.toast(`Restocked +${units} units for ${product.name}`);
+          await refresh();
+        } catch (err) {
+          App.toast(err.message, "error");
+        }
+      }
+    }
+  });
 
   // Form submit
   form.addEventListener("submit", async (event) => {

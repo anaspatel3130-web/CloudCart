@@ -468,6 +468,18 @@ Resources:
             ApiId: !Ref CloudCartApi
             Path: /ai/recommendations
             Method: POST
+        AiSearch:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /ai/search
+            Method: POST
+        AiInsights:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /ai/insights
+            Method: POST
 
   InventoryAlertTopic:
     Type: AWS::SNS::Topic

@@ -110,6 +110,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             <button class="btn btn--cyan" id="btn-buy-now" type="button" ${isOut ? "disabled" : ""} style="flex:1;">
               <i data-lucide="zap"></i> Buy Now
             </button>
+
+            <button class="btn btn--ghost" id="btn-wishlist-toggle" type="button" aria-label="Save to Wishlist" style="width:48px;padding:0;display:grid;place-items:center;">
+              <i data-lucide="heart" id="wishlist-icon" style="${API.isInWishlist(product.id) ? "fill:#ff3b69;color:#ff3b69;" : ""}"></i>
+            </button>
           </div>
 
           <!-- Trust Signals -->
@@ -283,6 +287,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (target) target.classList.add("active");
       });
     });
+
+    // Wishlist Toggle
+    const wishlistToggleBtn = document.getElementById("btn-wishlist-toggle");
+    const wishlistIcon = document.getElementById("wishlist-icon");
+    if (wishlistToggleBtn && wishlistIcon) {
+      wishlistToggleBtn.addEventListener("click", async () => {
+        const { isWishlisted } = await API.toggleWishlist(product.id);
+        wishlistIcon.style.fill = isWishlisted ? "#ff3b69" : "none";
+        wishlistIcon.style.color = isWishlisted ? "#ff3b69" : "currentColor";
+        App.updateWishlistBadge();
+        App.toast(isWishlisted ? "Saved to your studio wishlist" : "Removed from wishlist");
+      });
+    }
 
     // Populate Related Hardware Grid
     if (relatedGrid) {

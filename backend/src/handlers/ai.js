@@ -38,6 +38,23 @@ export function createAiHandler(services) {
         return success(200, { recommendations: result }, origin);
       }
 
+      if (path.endsWith("/search")) {
+        const result = await aiService.semanticSearch({
+          query: body.query || "",
+          limit: body.limit,
+        });
+        return success(200, result, origin);
+      }
+
+      if (path.endsWith("/insights")) {
+        const result = await aiService.getInsights({
+          type: body.type,
+          cartItems: body.cartItems,
+          orders: body.orders,
+        });
+        return success(200, result, origin);
+      }
+
       throw Errors.routeNotFound();
     } catch (error) {
       return handleError(error, origin);

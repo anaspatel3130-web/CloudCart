@@ -159,6 +159,55 @@ const API = {
     return products.filter((p) => p.featured).slice(0, limit);
   },
 
+  async searchAi({ query, limit = 8 }) {
+    if (!query || !query.trim()) return { query: "", matches: [], totalMatched: 0 };
+    if (!CONFIG.isDemo()) {
+      return request("POST", `${CONFIG.endpoints.ai}/search`, { query, limit });
+    }
+    await delay(120);
+    const products = DemoStore.getProducts();
+    return clientVectorSearch(query, products, limit);
+  },
+
+  async getAiInsights({ type = "cart", cartItems = [], orders = [] }) {
+    if (!CONFIG.isDemo()) {
+      return request("POST", `${CONFIG.endpoints.ai}/insights`, { type, cartItems, orders });
+    }
+    await delay(160);
+    const products = DemoStore.getProducts();
+    if (type === "cart") {
+      return clientCartInsights(cartItems, products);
+    }
+    return clientAdminInsights(products, orders);
+  },
+
+  async getWishlist() {
+    const ids = DemoStore.read(CONFIG.storage.wishlist, []);
+    const products = await this.getProducts();
+    return (Array.isArray(ids) ? ids : []).map((id) => products.find((p) => p.id === id)).filter(Boolean);
+  },
+
+  isInWishlist(productId) {
+    const ids = DemoStore.read(CONFIG.storage.wishlist, []);
+    return Array.isArray(ids) && ids.includes(productId);
+  },
+
+  async toggleWishlist(productId) {
+    let ids = DemoStore.read(CONFIG.storage.wishlist, []);
+    if (!Array.isArray(ids)) ids = [];
+    const index = ids.indexOf(productId);
+    let isWishlisted = false;
+    if (index >= 0) {
+      ids.splice(index, 1);
+      isWishlisted = false;
+    } else {
+      ids.push(productId);
+      isWishlisted = true;
+    }
+    DemoStore.write(CONFIG.storage.wishlist, ids);
+    return { isWishlisted, count: ids.length };
+  },
+
   async updateProductStock(id, newStock) {
     const list = DemoStore.getProducts();
     const product = list.find((p) => p.id === id);
@@ -355,5 +404,116 @@ function executeClientAi({ message, history, context, products }) {
     reply,
     recommendations,
     suggestedFollowUps: followUps,
+  };
+}
+
+function clientTokenize(text) {
+  if (!text) return [];
+  return String(text).toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((t) => t.length > 1);
+}
+
+function clientVectorSearch(query, products, limit = 8) {
+  const queryTokens = clientTokenize(query);
+  if (!queryTokens.length) return { query, matches: [], totalMatched: 0 };
+
+  const scored = products.map((prod) => {
+    const tokens = [
+      ...clientTokenize(prod.name), ...clientTokenize(prod.name), ...clientTokenize(prod.name),
+      ...clientTokenize(prod.category), ...clientTokenize(prod.category),
+      ...clientTokenize(prod.tagline),
+      ...clientTokenize(prod.description)
+    ];
+
+    let dot = 0;
+    for (const qt of queryTokens) {
+      if (tokens.includes(qt)) dot += 1;
+    }
+    const magA = Math.sqrt(queryTokens.length);
+    const magB = Math.sqrt(tokens.length);
+    let score = magA && magB ? dot / (magA * magB) : 0;
+
+    const lower = query.toLowerCase();
+    if (prod.name.toLowerCase().includes(lower)) score += 0.35;
+    if (prod.category.toLowerCase().includes(lower)) score += 0.20;
+
+    return { product: prod, score: Math.round(score * 100) / 100 };
+  });
+
+  const matches = scored
+    .filter((s) => s.score > 0.05)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((s) => ({ ...s.product, relevanceScore: s.score }));
+
+  return { query, matches, totalMatched: matches.length };
+}
+
+function clientCartInsights(cartItems, products) {
+  const itemMap = new Map();
+  let subtotal = 0;
+  for (const item of cartItems) {
+    const pId = item.productId || item.id;
+    const prod = products.find((p) => p.id === pId);
+    if (prod) {
+      const qty = Number(item.quantity) || 1;
+      itemMap.set(pId, { ...prod, cartQty: qty });
+      subtotal += prod.price * qty;
+    }
+  }
+
+  const freeShippingThreshold = 5000;
+  const shippingRemaining = Math.max(0, freeShippingThreshold - subtotal);
+  const eligibleForFreeShipping = subtotal >= freeShippingThreshold;
+
+  const notInCart = products.filter((p) => !itemMap.has(p.id));
+  const suggestedAddons = notInCart.filter((p) => p.featured || p.newArrival).slice(0, 3);
+
+  return {
+    subtotal,
+    eligibleForFreeShipping,
+    shippingRemaining,
+    suggestedAddons,
+    adviceMessage: eligibleForFreeShipping
+      ? "Your studio order qualifies for Complimentary White-Glove Courier Dispatch."
+      : `Add ₹${shippingRemaining.toLocaleString("en-IN")} more to unlock Complimentary White-Glove Courier Delivery.`,
+    recommendedVoucher: subtotal > 15000 ? "FUTURE20" : "CLOUDCART10",
+  };
+}
+
+function clientAdminInsights(products, orders) {
+  const outOfStock = products.filter((p) => p.stock <= 0);
+  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 5);
+  const healthyStock = products.filter((p) => p.stock > 5);
+
+  const inventoryHealthPct = products.length > 0
+    ? Math.round((healthyStock.length / products.length) * 100)
+    : 100;
+
+  const inventoryValuation = products.reduce((sum, p) => sum + (p.price * (p.stock || 0)), 0);
+
+  const restockUrgencyList = [...outOfStock, ...lowStock]
+    .sort((a, b) => (b.demandScore || 50) - (a.demandScore || 50))
+    .slice(0, 6)
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      stock: p.stock,
+      category: p.category,
+      demandScore: p.demandScore || 70,
+      urgency: p.stock === 0 ? "CRITICAL" : "HIGH",
+      suggestedReorderUnits: Math.max(15, 25 - p.stock),
+    }));
+
+  return {
+    totalProducts: products.length,
+    outOfStockCount: outOfStock.length,
+    lowStockCount: lowStock.length,
+    inventoryHealthPct,
+    inventoryValuation,
+    restockUrgencyList,
+    executiveSummary: outOfStock.length > 0
+      ? `Attention required: ${outOfStock.length} high-demand SKUs are depleted. Immediate restock recommended.`
+      : `Catalogue health optimal at ${inventoryHealthPct}%. ${lowStock.length} SKUs in low-buffer range.`,
+    generatedAt: new Date().toISOString(),
   };
 }

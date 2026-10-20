@@ -40,6 +40,26 @@
         <!-- Top KPIs Metric Cards -->
         <div class="admin-stats-grid" id="admin-stats"></div>
 
+        <!-- AI Demand & Inventory Restock Intelligence Panel -->
+        <section class="admin-ai-insights-card" id="admin-ai-insights" style="background:linear-gradient(135deg, rgba(157,255,20,0.04) 0%, rgba(0,240,255,0.03) 100%), var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:32px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--neon-glow-soft);border:1px solid var(--neon);color:var(--neon);display:grid;place-items:center;">
+                <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+              </div>
+              <div>
+                <h3 style="font-size:1.15rem;font-family:var(--font-heading);margin:0;">Aether Predictive Inventory Intelligence</h3>
+                <span style="font-size:0.75rem;color:var(--neon);font-family:var(--font-mono);letter-spacing:0.05em;">AUTONOMOUS RESTOCK RADAR · 60 HARDWARE SKUS</span>
+              </div>
+            </div>
+            <div id="ai-inventory-health-pill" style="font-family:var(--font-mono);font-size:0.8rem;padding:4px 12px;border-radius:var(--radius-full);background:rgba(255,255,255,0.04);border:1px solid var(--border);">
+              Health: <strong id="ai-health-pct" style="color:var(--neon);">98%</strong>
+            </div>
+          </div>
+          <p id="ai-exec-summary" style="font-size:0.92rem;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;"></p>
+          <div id="ai-restock-chips" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+        </section>
+
         <!-- Master Layout -->
         <div class="admin-layout-grid">
           <!-- Inventory Table Section -->
@@ -107,10 +127,12 @@
                 <label for="field-category">Ecosystem Category *</label>
                 <select class="select" id="field-category" required>
                   <option value="">Select Category</option>
-                  <option>Audio</option>
-                  <option>Desk Setup</option>
-                  <option>Accessories</option>
-                  <option>Mobile Essentials</option>
+                  <option>Audio & Acoustics</option>
+                  <option>Neural Wearables</option>
+                  <option>Quantum Displays</option>
+                  <option>Cybernetics</option>
+                  <option>Studio Ergonomics</option>
+                  <option>Edge Compute</option>
                 </select>
               </div>
 

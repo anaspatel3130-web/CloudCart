@@ -53,6 +53,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       list.innerHTML = emptyMarkup();
       if (summary) summary.hidden = true;
       if (shippingMeter) shippingMeter.hidden = true;
+      const aiSection = document.getElementById("ai-smart-cart-section");
+      if (aiSection) aiSection.hidden = true;
       App.updateCartBadge();
       App.refreshIcons();
       return;
@@ -137,6 +139,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     sessionStorage.setItem("cloudcart_checkout_total", String(total));
 
     App.updateCartBadge();
+
+    // Fetch and display Aether AI Smart Cart Insights
+    const aiSection = document.getElementById("ai-smart-cart-section");
+    const aiAdvice = document.getElementById("ai-cart-advice");
+    const aiGrid = document.getElementById("ai-cart-recommendations-grid");
+    if (aiSection && aiGrid) {
+      try {
+        const insights = await API.getAiInsights({ type: "cart", cartItems: cart });
+        if (insights && Array.isArray(insights.suggestedAddons) && insights.suggestedAddons.length) {
+          aiSection.hidden = false;
+          if (aiAdvice) aiAdvice.textContent = insights.adviceMessage || "";
+          aiGrid.innerHTML = insights.suggestedAddons.map(App.productCard).join("");
+          App.bindImageFallback(aiGrid);
+          App.refreshIcons();
+        } else {
+          aiSection.hidden = true;
+        }
+      } catch {
+        aiSection.hidden = true;
+      }
+    }
   };
 
   // Stepper and Remove event delegation

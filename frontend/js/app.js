@@ -54,6 +54,7 @@ const App = {
     const isOut = product.stock <= 0;
     const disabled = isOut ? "disabled" : "";
     const cta = isOut ? "Sold Out" : "Add to bag";
+    const isWishlisted = API.isInWishlist(product.id);
 
     let badges = "";
     if (product.newArrival) {
@@ -69,6 +70,9 @@ const App = {
       <article class="product-card" data-card-id="${App.escape(product.id)}">
         <div class="product-card__media">
           <div class="product-card__badges">${badges}</div>
+          <button class="product-card__wishlist-btn ${isWishlisted ? "is-active" : ""}" type="button" data-toggle-wishlist="${App.escape(product.id)}" aria-label="Save to Wishlist">
+            <i data-lucide="heart"></i>
+          </button>
           <a href="product.html?id=${encodeURIComponent(product.id)}" aria-label="${App.escape(product.name)}">
             ${
               product.image
@@ -112,6 +116,7 @@ const App = {
     const page = App.page();
     const isHome = page === "index.html" || page === "";
     const isProducts = page === "products.html" || page === "product.html";
+    const isWishlist = page === "wishlist.html";
     const isCart = page === "cart.html" || page === "checkout.html";
     const isOrders = page === "orders.html";
     const isAdmin = page === "admin.html";
@@ -139,6 +144,7 @@ const App = {
               <a href="products.html"${isProducts ? ' aria-current="page"' : ""}>Shop Catalog</a>
               <a href="${isHome ? "#collections" : "index.html#collections"}">Collections</a>
               <a href="products.html?filter=new">New Arrivals</a>
+              <a href="wishlist.html"${isWishlist ? ' aria-current="page"' : ""}>Wishlist</a>
               <a href="orders.html"${isOrders ? ' aria-current="page"' : ""}>Track Order</a>
               <a href="admin.html"${isAdmin ? ' aria-current="page"' : ""}>Admin Console</a>
             </div>
@@ -152,6 +158,10 @@ const App = {
               <button class="icon-btn" type="button" data-open="account" aria-label="Account details">
                 <i data-lucide="user"></i>
               </button>
+              <a class="icon-btn" href="wishlist.html"${isWishlist ? ' aria-current="page"' : ""} aria-label="Studio Wishlist">
+                <i data-lucide="heart"></i>
+                <span class="cart-count wishlist-count" id="wishlist-count">0</span>
+              </a>
               <a class="icon-btn" href="cart.html"${isCart ? ' aria-current="page"' : ""} aria-label="Shopping bag">
                 <i data-lucide="shopping-bag"></i>
                 <span class="cart-count" id="cart-count">0</span>
@@ -167,6 +177,7 @@ const App = {
             <a href="products.html">Shop Catalog</a>
             <a href="${isHome ? "#collections" : "index.html#collections"}">Curated Rooms</a>
             <a href="products.html?filter=new">New Arrivals</a>
+            <a href="wishlist.html">Studio Wishlist</a>
             <a href="orders.html">Track Order</a>
             <a href="cart.html">Shopping Bag</a>
             <a href="admin.html">Admin Console</a>
@@ -343,6 +354,7 @@ const App = {
 
     App.refreshIcons();
     App.updateCartBadge();
+    App.updateWishlistBadge();
     App.bindNavbarScroll();
   },
 
@@ -366,6 +378,17 @@ const App = {
     if (!el) return;
     const cart = await API.getCart();
     const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    el.textContent = String(count);
+    el.classList.toggle("is-visible", count > 0);
+    el.classList.add("bump");
+    setTimeout(() => el.classList.remove("bump"), 350);
+  },
+
+  updateWishlistBadge() {
+    const el = document.getElementById("wishlist-count");
+    if (!el) return;
+    const ids = DemoStore.read(CONFIG.storage.wishlist, []);
+    const count = Array.isArray(ids) ? ids.length : 0;
     el.textContent = String(count);
     el.classList.toggle("is-visible", count > 0);
     el.classList.add("bump");
@@ -496,6 +519,23 @@ const App = {
           addBtn.innerHTML = prevText;
           addBtn.disabled = false;
           App.refreshIcons();
+        }
+        return;
+      }
+
+      // Wishlist toggle click
+      const wishBtn = event.target.closest("[data-toggle-wishlist]");
+      if (wishBtn) {
+        event.preventDefault();
+        const id = wishBtn.getAttribute("data-toggle-wishlist");
+        try {
+          const { isWishlisted } = await API.toggleWishlist(id);
+          wishBtn.classList.toggle("is-active", isWishlisted);
+          App.updateWishlistBadge();
+          App.toast(isWishlisted ? "Saved to your studio wishlist" : "Removed from wishlist");
+          window.dispatchEvent(new CustomEvent("wishlist:updated", { detail: { id, isWishlisted } }));
+        } catch (err) {
+          App.toast(err.message, "error");
         }
         return;
       }
@@ -648,29 +688,65 @@ const App = {
             resultsContainer.innerHTML = `<p style="color:var(--text-tertiary);font-size:0.85rem;padding:8px 0;">Type at least 2 characters to explore...</p>`;
             return;
           }
-          const products = await API.getProducts();
-          const matches = products.filter((p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            p.description.toLowerCase().includes(q)
-          );
-          if (!matches.length) {
-            resultsContainer.innerHTML = `<p style="color:var(--text-secondary);font-size:0.88rem;padding:12px 0;">No matching objects found for "${App.escape(q)}".</p>`;
-            return;
+          try {
+            const searchRes = await API.searchAi({ query: q, limit: 6 });
+            const matches = searchRes && Array.isArray(searchRes.matches) && searchRes.matches.length
+              ? searchRes.matches
+              : (await API.getProducts()).filter((p) =>
+                  p.name.toLowerCase().includes(q) ||
+                  p.category.toLowerCase().includes(q) ||
+                  p.description.toLowerCase().includes(q)
+                ).slice(0, 6);
+
+            if (!matches.length) {
+              resultsContainer.innerHTML = `<p style="color:var(--text-secondary);font-size:0.88rem;padding:12px 0;">No matching objects found for "${App.escape(q)}".</p>`;
+              return;
+            }
+
+            resultsContainer.innerHTML = `
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--neon);padding:4px 0 8px;letter-spacing:0.06em;">
+                <span class="pulse-dot"></span> AETHER VECTOR COGNITION (${matches.length} MATCHES)
+              </div>
+              ${matches.map((p) => `
+                <a class="search-result-item" href="product.html?id=${encodeURIComponent(p.id)}">
+                  <div class="search-result-thumb">
+                    <img src="${App.escape(p.image)}" alt="" data-fallback>
+                  </div>
+                  <div class="search-result-info">
+                    <strong>${App.escape(p.name)}</strong>
+                    <span>${App.escape(p.category)} · ${p.stock > 0 ? "In Stock" : "Out of Stock"}${p.relevanceScore ? ` · ${Math.round(p.relevanceScore * 100)}% match` : ""}</span>
+                  </div>
+                  <span class="search-result-price">${App.formatPrice(p.price)}</span>
+                </a>
+              `).join("")}
+            `;
+            App.bindImageFallback(resultsContainer);
+          } catch {
+            const products = await API.getProducts();
+            const matches = products.filter((p) =>
+              p.name.toLowerCase().includes(q) ||
+              p.category.toLowerCase().includes(q) ||
+              p.description.toLowerCase().includes(q)
+            ).slice(0, 5);
+
+            if (!matches.length) {
+              resultsContainer.innerHTML = `<p style="color:var(--text-secondary);font-size:0.88rem;padding:12px 0;">No matching objects found for "${App.escape(q)}".</p>`;
+              return;
+            }
+            resultsContainer.innerHTML = matches.map((p) => `
+              <a class="search-result-item" href="product.html?id=${encodeURIComponent(p.id)}">
+                <div class="search-result-thumb">
+                  <img src="${App.escape(p.image)}" alt="" data-fallback>
+                </div>
+                <div class="search-result-info">
+                  <strong>${App.escape(p.name)}</strong>
+                  <span>${App.escape(p.category)} · ${p.stock > 0 ? "In Stock" : "Out of Stock"}</span>
+                </div>
+                <span class="search-result-price">${App.formatPrice(p.price)}</span>
+              </a>
+            `).join("");
+            App.bindImageFallback(resultsContainer);
           }
-          resultsContainer.innerHTML = matches.slice(0, 5).map((p) => `
-            <a class="search-result-item" href="product.html?id=${encodeURIComponent(p.id)}">
-              <div class="search-result-thumb">
-                <img src="${App.escape(p.image)}" alt="" data-fallback>
-              </div>
-              <div class="search-result-info">
-                <strong>${App.escape(p.name)}</strong>
-                <span>${App.escape(p.category)} · ${p.stock > 0 ? "In Stock" : "Out of Stock"}</span>
-              </div>
-              <span class="search-result-price">${App.formatPrice(p.price)}</span>
-            </a>
-          `).join("");
-          App.bindImageFallback(resultsContainer);
         }, 180);
       }
     });

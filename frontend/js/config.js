@@ -41,6 +41,7 @@ const CONFIG = {
   currency: "INR",
   storage: {
     cart: "cloudcart_cart",
+    wishlist: "cloudcart_wishlist",
     products: "cloudcart_demo_products",
     orders: "cloudcart_demo_orders",
   },
