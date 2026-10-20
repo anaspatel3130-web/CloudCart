@@ -1,26 +1,22 @@
 {
   "version": 2,
-  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/products", "destination": "/products.html" },
+    { "source": "/product", "destination": "/product.html" },
+    { "source": "/wishlist", "destination": "/wishlist.html" },
+    { "source": "/cart", "destination": "/cart.html" },
+    { "source": "/checkout", "destination": "/checkout.html" },
+    { "source": "/orders", "destination": "/orders.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
   ]
