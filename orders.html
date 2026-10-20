@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracking & Logistics — CloudCart</title>
+  <meta name="description" content="Track your hardware fulfillment progress, logistics milestones, and official studio receipts in real-time." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="orders">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <div class="container" style="padding-top: 36px;">
+        <header class="page-hero">
+          <p class="section__kicker">Logistics Intelligence</p>
+          <h1>Real-Time Order Tracking</h1>
+          <p class="lede">Verify fulfillment stages, atomic cloud commits, and multi-stage air express dispatch directly from DynamoDB datastores.</p>
+        </header>
+
+        <!-- Order Lookup Form -->
+        <section class="summary-card" style="position:static;margin-bottom:36px;padding:24px 28px;">
+          <form id="track-order-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+            <div class="search-input-wrap" style="flex:1;min-width:280px;">
+              <i data-lucide="package"></i>
+              <input class="input" id="track-order-id-input" type="text" placeholder="Enter Order ID (e.g. ord-demo-1001 or ord-demo-...)" required />
+            </div>
+            <button class="btn btn--primary" type="submit">
+              <i data-lucide="crosshair"></i> Track Hardware
+            </button>
+          </form>
+
+          <!-- Quick Select Recent Orders -->
+          <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:0.75rem;color:var(--text-tertiary);text-transform:uppercase;font-family:var(--font-mono);">Your Orders:</span>
+            <div id="recent-order-chips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+          </div>
+        </section>
+
+        <!-- Dynamic Tracking Display Container -->
+        <div id="order-tracking-content">
+          <div style="text-align:center;padding:64px 20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);">
+            <div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text-tertiary);display:grid;place-items:center;margin:0 auto 16px;">
+              <i data-lucide="radar"></i>
+            </div>
+            <h3 style="font-size:1.35rem;margin-bottom:8px;">Awaiting Order Reference</h3>
+            <p style="color:var(--text-secondary);font-size:0.92rem;max-width:440px;margin:0 auto 20px;">
+              Enter your Order Reference ID above or select any of your past sessions to inspect real-time logistics telemetry.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/orders.js"></script>
+</body>
+</html>

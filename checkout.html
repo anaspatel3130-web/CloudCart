@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Express Checkout — CloudCart</title>
+  <meta name="description" content="Secure, frictionless checkout for CloudCart hardware objects." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="checkout">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <div class="container" style="padding-top: 36px;">
+        <!-- Checkout Progress Stepper -->
+        <div class="checkout-steps-nav">
+          <a class="checkout-step-pill" href="cart.html">
+            <span class="step-num">1</span> Bag
+          </a>
+          <i data-lucide="chevron-right" style="width:14px;color:var(--text-tertiary);"></i>
+          <div class="checkout-step-pill active">
+            <span class="step-num">2</span> Shipping & Details
+          </div>
+          <i data-lucide="chevron-right" style="width:14px;color:var(--text-tertiary);"></i>
+          <div class="checkout-step-pill active">
+            <span class="step-num">3</span> Payment
+          </div>
+          <i data-lucide="chevron-right" style="width:14px;color:var(--text-tertiary);"></i>
+          <div class="checkout-step-pill" id="step-confirm-label">
+            <span class="step-num">4</span> Confirmation
+          </div>
+        </div>
+
+        <div class="checkout-layout" id="checkout-view">
+          <!-- Left Column: Checkout Inputs Form -->
+          <div>
+            <!-- Express One-Touch Pay -->
+            <button class="express-pay-btn" id="express-apple-pay" type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.4c.66-.82 1.11-1.96.99-3.1-.96.04-2.12.64-2.8 1.44-.6.69-1.12 1.83-.98 2.94 1.07.08 2.16-.55 2.79-1.28z"/>
+              </svg>
+              <span>Instant Pay with Apple Pay</span>
+            </button>
+
+            <div class="divider-with-text">
+              <span>Or complete with Credit Card / UPI</span>
+            </div>
+
+            <form id="checkout-form" novalidate>
+              <!-- Section: Contact Details -->
+              <section class="checkout-section">
+                <h3><i data-lucide="mail"></i> Contact Information</h3>
+                <div class="form-grid-2">
+                  <div class="field">
+                    <label for="check-email">Client Email Address *</label>
+                    <input class="input" id="check-email" name="email" type="email" placeholder="client@studio.com" required value="patron@cloudcart.dev" />
+                  </div>
+                  <div class="field">
+                    <label for="check-phone">Mobile Phone (for dispatch SMS) *</label>
+                    <input class="input" id="check-phone" name="phone" type="tel" placeholder="+91 98765 43210" required value="+91 98765 43210" />
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section: Shipping Destination -->
+              <section class="checkout-section">
+                <h3><i data-lucide="map-pin"></i> Shipping Destination</h3>
+                <div class="field">
+                  <label for="check-name">Full Recipient Name *</label>
+                  <input class="input" id="check-name" name="name" placeholder="Aarav Sharma" required value="Aarav Sharma" />
+                </div>
+                <div class="field">
+                  <label for="check-address">Street Address *</label>
+                  <input class="input" id="check-address" name="address" placeholder="Flat / Villa / Tech Park suite" required value="Indiranagar 100ft Road, Studio Suite 4B" />
+                </div>
+                <div class="form-grid-3">
+                  <div class="field">
+                    <label for="check-city">City *</label>
+                    <input class="input" id="check-city" name="city" required value="Bengaluru" />
+                  </div>
+                  <div class="field">
+                    <label for="check-state">State *</label>
+                    <select class="select" id="check-state" required>
+                      <option selected>Karnataka</option>
+                      <option>Maharashtra</option>
+                      <option>Delhi NCR</option>
+                      <option>Tamil Nadu</option>
+                      <option>Telangana</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="check-pin">PIN Code *</label>
+                    <input class="input" id="check-pin" name="pincode" required value="560038" />
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section: Delivery Method -->
+              <section class="checkout-section">
+                <h3><i data-lucide="truck"></i> Delivery Method</h3>
+                <div class="delivery-options">
+                  <label class="delivery-radio-card active" id="delivery-standard">
+                    <div class="delivery-radio-info">
+                      <input type="radio" name="shippingMethod" value="0" checked style="accent-color:var(--neon);" />
+                      <div>
+                        <strong>Standard Air Dispatch (Free)</strong>
+                        <span>Insured courier delivery across India within 3–4 business days.</span>
+                      </div>
+                    </div>
+                    <strong style="color:var(--neon);font-family:var(--font-mono);">FREE</strong>
+                  </label>
+
+                  <label class="delivery-radio-card" id="delivery-priority">
+                    <div class="delivery-radio-info">
+                      <input type="radio" name="shippingMethod" value="299" style="accent-color:var(--neon);" />
+                      <div>
+                        <strong>Priority Dedicated Flight Express (₹299)</strong>
+                        <span>Next-day prioritized morning delivery with white-glove packaging.</span>
+                      </div>
+                    </div>
+                    <strong style="font-family:var(--font-mono);">₹299</strong>
+                  </label>
+                </div>
+              </section>
+
+              <!-- Section: Payment Method -->
+              <section class="checkout-section">
+                <h3><i data-lucide="credit-card"></i> Payment Method</h3>
+
+                <div class="payment-tabs" role="tablist">
+                  <button class="payment-tab-btn active" id="tab-btn-card" type="button">
+                    <i data-lucide="credit-card"></i> Credit / Debit Card
+                  </button>
+                  <button class="payment-tab-btn" id="tab-btn-upi" type="button">
+                    <i data-lucide="qr-code"></i> Instant UPI / QR
+                  </button>
+                  <button class="payment-tab-btn" id="tab-btn-net" type="button">
+                    <i data-lucide="building"></i> Net Banking
+                  </button>
+                </div>
+
+                <!-- Interactive Card Simulator Box -->
+                <div id="payment-card-panel">
+                  <div class="card-preview-sim">
+                    <div class="card-sim-top">
+                      <div class="card-chip"></div>
+                      <span class="card-brand-logo" id="card-brand-display">VISA</span>
+                    </div>
+                    <div class="card-number-sim" id="card-number-display">•••• •••• •••• 4242</div>
+                    <div class="card-bottom-sim">
+                      <div>
+                        <span>Cardholder</span>
+                        <strong id="card-name-display">AARAV SHARMA</strong>
+                      </div>
+                      <div>
+                        <span>Expires</span>
+                        <strong id="card-expiry-display">12/28</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="card-number">Card Number *</label>
+                    <input class="input" id="card-number" placeholder="4242 •••• •••• 4242" maxlength="19" value="4242 4242 4242 4242" required />
+                  </div>
+                  <div class="form-grid-2">
+                    <div class="field">
+                      <label for="card-expiry">Expiry Date (MM/YY) *</label>
+                      <input class="input" id="card-expiry" placeholder="MM/YY" maxlength="5" value="12/28" required />
+                    </div>
+                    <div class="field">
+                      <label for="card-cvv">Security Code (CVV) *</label>
+                      <input class="input" id="card-cvv" type="password" placeholder="•••" maxlength="4" value="888" required />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- UPI Panel -->
+                <div id="payment-upi-panel" hidden>
+                  <div class="upi-qr-box">
+                    <div class="qr-placeholder">
+                      <!-- Render QR Graphic -->
+                      <svg viewBox="0 0 100 100" width="100%" height="100%" fill="#000">
+                        <rect width="100" height="100" fill="#fff"/>
+                        <path d="M10 10h30v30H10zM15 15v20h20V15zm5 5h10v10H20zM60 10h30v30H60zM65 15v20h20V15zm5 5h10v10H70zM10 60h30v30H10zM15 65v20h20V65zm5 5h10v10H20zM45 10h10v10H45zM45 30h10v10H45zM45 50h10v10H45zM10 45h10v10H10zM30 45h10v10H30zM50 45h20v10H50zM60 60h10v10H60zM75 60h15v10H75zM60 75h20v10H60zM85 75h10v20H85zM60 85h15v10H60z"/>
+                      </svg>
+                    </div>
+                    <strong style="color:var(--text-primary);font-size:0.95rem;margin-bottom:4px;">Scan with Any UPI App</strong>
+                    <span style="color:var(--text-secondary);font-size:0.78rem;">Supports Google Pay, PhonePe, Paytm, BHIM</span>
+                    <div style="margin-top:16px;width:100%;max-width:320px;">
+                      <input class="input" placeholder="Or enter your UPI ID (e.g. user@okhdfcbank)" value="aarav@okaxis" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Net Banking Panel -->
+                <div id="payment-net-panel" hidden>
+                  <div class="field">
+                    <label for="bank-select">Choose Bank</label>
+                    <select class="select" id="bank-select">
+                      <option>HDFC Bank</option>
+                      <option>ICICI Bank</option>
+                      <option>State Bank of India</option>
+                      <option>Axis Bank</option>
+                      <option>Kotak Mahindra Bank</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <p class="field-error" id="checkout-error" style="margin-bottom:16px;"></p>
+
+              <!-- Final Submit Button -->
+              <button class="btn btn--primary btn--block btn--large" id="submit-order-btn" type="submit">
+                <i data-lucide="lock"></i>
+                <span id="btn-pay-label">Authorize & Complete Order</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Right Column: Sticky Summary & Miniature Items -->
+          <aside class="summary-card" id="checkout-summary-card">
+            <h2>Order Review</h2>
+            
+            <!-- Items Mini List -->
+            <div class="checkout-mini-list" id="checkout-mini-items"></div>
+
+            <div class="summary__row">
+              <span>Subtotal</span>
+              <span id="co-subtotal">₹0</span>
+            </div>
+
+            <div class="summary__row">
+              <span>Delivery Service</span>
+              <span id="co-shipping">FREE</span>
+            </div>
+
+            <div class="summary__row summary__row--discount" id="co-discount-row" hidden>
+              <span>Voucher Applied</span>
+              <span id="co-discount">-₹0</span>
+            </div>
+
+            <div class="summary__row summary__row--total">
+              <span>Grand Total</span>
+              <span id="co-total">₹0</span>
+            </div>
+
+            <div style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-md);">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <i data-lucide="shield-check" style="color:var(--neon);width:18px;height:18px;"></i>
+                <strong style="font-size:0.85rem;">Zero Risk Cloud Guarantee</strong>
+              </div>
+              <p style="font-size:0.75rem;color:var(--text-secondary);line-height:1.5;">This order transaction is handled via educational serverless simulation. Stock is atomically committed in DynamoDB memory.</p>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Order Success View (Hidden until order completes) -->
+        <div id="order-success-view" hidden>
+          <div class="order-success-card" style="max-width:680px;margin:0 auto;background:var(--bg-surface);border:1px solid var(--border-neon);border-radius:var(--radius-xl);padding:48px 36px;box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 40px var(--neon-glow-soft);">
+            <div class="success-check-ring">
+              <i data-lucide="check"></i>
+            </div>
+            <p class="section__kicker">Order Confirmed</p>
+            <h1 style="font-size:2.4rem;margin-bottom:12px;">Payment Authorized.</h1>
+            <p style="color:var(--text-secondary);font-size:1.05rem;max-width:520px;margin:0 auto 24px;">
+              Thank you for choosing CloudCart Studio. Your hardware reservation has been committed atomically to the cloud datastore.
+            </p>
+
+            <div class="order-receipt-box">
+              <div class="receipt-row">
+                <span>Order Reference</span>
+                <strong id="receipt-order-id" style="color:var(--neon);">ORD-DEMO-XXXX</strong>
+              </div>
+              <div class="receipt-row">
+                <span>Total Charged</span>
+                <strong id="receipt-total">₹0</strong>
+              </div>
+              <div class="receipt-row">
+                <span>Fulfillment Speed</span>
+                <span id="receipt-shipping">Standard Ground Dispatch</span>
+              </div>
+              <div class="receipt-row">
+                <span>Estimated Arrival</span>
+                <span id="receipt-date">3 Business Days</span>
+              </div>
+              <div class="receipt-row">
+                <span>Recipient</span>
+                <span id="receipt-customer">Aarav Sharma</span>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+              <a class="btn btn--cyan" id="track-order-btn-link" href="orders.html">
+                <i data-lucide="crosshair"></i> Track Consignment
+              </a>
+              <a class="btn btn--primary" href="products.html">
+                Continue Shopping <i data-lucide="arrow-right"></i>
+              </a>
+              <a class="btn btn--ghost" href="admin.html">
+                View in Admin Console <i data-lucide="layout-dashboard"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CloudCart — Upgrade Your Everyday</title>
+  <meta name="description" content="CloudCart is a luxury technology storefront engineered for zero-latency serverless cloud computing." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <!-- Immersive Hero Section -->
+      <section class="hero">
+        <div class="hero-glow-backlight" aria-hidden="true"></div>
+        <div class="container hero__grid">
+          <div>
+            <div class="hero-tag">
+              <span class="tag-dot"></span> Studio Release / Vol. 01
+            </div>
+            <h1>
+              Upgrade your <span class="gradient-text">everyday.</span>
+            </h1>
+            <p class="hero__copy">
+              A curated technology storefront engineered for serverless architectures. Bespoke acoustics, sculpted desk tools, and minimal carry objects—calm surfaces, uncompromising precision, zero noise.
+            </p>
+            <div class="hero__cta">
+              <a class="btn btn--primary btn--large" href="products.html">
+                Explore Collection <i data-lucide="arrow-right"></i>
+              </a>
+              <button class="btn btn--ghost btn--large" type="button" data-quick-view="prod-001">
+                <i data-lucide="play-circle"></i> Quick Specs
+              </button>
+            </div>
+            <div class="hero-specs-ticker">
+              <div class="spec-badge">
+                <strong>40 HR</strong>
+                <span>ANC Playtime</span>
+              </div>
+              <div class="spec-badge">
+                <strong>0.2 MS</strong>
+                <span>Edge Latency</span>
+              </div>
+              <div class="spec-badge">
+                <strong>CNC 6063</strong>
+                <span>Aerospace Alloy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-stage">
+              <div class="hero-live-pill">
+                <span class="indicator"></span> Live Hardware Spotlight
+              </div>
+              <figure class="hero-frame" id="hero-media">
+                <img
+                  id="hero-img"
+                  src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80"
+                  alt="Aether Wireless Headphones"
+                  data-fallback
+                />
+                <figcaption class="hero-chip">
+                  <div class="hero-chip__info">
+                    <span class="hero-chip__tag">Flagship Series</span>
+                    <strong class="hero-chip__name" id="hero-name">Aether Wireless Headphones</strong>
+                  </div>
+                  <div class="hero-chip__price" id="hero-price">₹8,999</div>
+                </figcaption>
+              </figure>
+            </div>
+            
+            <!-- Interactive Hardware Switcher Tabs -->
+            <div class="hero-switchers" role="tablist" aria-label="Hero flagship selector">
+              <button class="hero-switch-btn active" type="button" data-hero-product="prod-001">Aether Audio</button>
+              <button class="hero-switch-btn" type="button" data-hero-product="prod-002">Graphite 75%</button>
+              <button class="hero-switch-btn" type="button" data-hero-product="prod-005">Pulse Speaker</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="container metrics-ribbon__grid">
+          <div class="metric-item">
+            <div class="metric-icon"><i data-lucide="zap"></i></div>
+            <div>
+              <h4>Serverless Core</h4>
+              <p>Instant edge delivery via Amazon S3 and Lambda APIs.</p>
+            </div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-icon"><i data-lucide="shield-check"></i></div>
+            <div>
+              <h4>Verified Inventory</h4>
+              <p>Atomic transactions preventing overselling in DynamoDB.</p>
+            </div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-icon"><i data-lucide="box"></i></div>
+            <div>
+              <h4>Precision Crafted</h4>
+              <p>Aerospace aluminum and tactile double-shot PBT.</p>
+            </div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-icon"><i data-lucide="truck"></i></div>
+            <div>
+              <h4>Priority Dispatch</h4>
+              <p>Complimentary expedited express delivery across India.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Curated Rooms / Collections Grid -->
+      <section class="section" id="collections">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <p class="section__kicker">Curated Environments</p>
+              <h2>Six disciplines. One ecosystem.</h2>
+            </div>
+            <p class="section__subtitle">Explore our edited 60-piece hardware catalogue grouped across studio audio, neural wearables, and workspace cybernetics.</p>
+          </div>
+          <div class="collection-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+            <a class="collection-card" href="products.html?category=Audio%20%26%20Acoustics">
+              <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80" alt="Audio & Acoustics Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">01 / ACOUSTICS</span>
+                <h3 class="collection-card__title">Audio & Acoustics</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+            <a class="collection-card" href="products.html?category=Neural%20Wearables">
+              <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80" alt="Neural Wearables Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">02 / BIOMETRICS</span>
+                <h3 class="collection-card__title">Neural Wearables</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+            <a class="collection-card" href="products.html?category=Quantum%20Displays">
+              <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1200&q=80" alt="Quantum Displays Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">03 / OPTICS</span>
+                <h3 class="collection-card__title">Quantum Displays</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+            <a class="collection-card" href="products.html?category=Cybernetics">
+              <img src="https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=1200&q=80" alt="Cybernetics Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">04 / INPUT</span>
+                <h3 class="collection-card__title">Cybernetics</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+            <a class="collection-card" href="products.html?category=Studio%20Ergonomics">
+              <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=80" alt="Studio Ergonomics Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">05 / POSTURE</span>
+                <h3 class="collection-card__title">Studio Ergonomics</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+            <a class="collection-card" href="products.html?category=Edge%20Compute">
+              <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80" alt="Edge Compute Collection" />
+              <div class="collection-card__overlay">
+                <span class="collection-card__num">06 / TELEMETRY</span>
+                <h3 class="collection-card__title">Edge Compute</h3>
+                <span class="collection-card__action">Explore Category <i data-lucide="chevron-right"></i></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Opening Edit (Featured Grid) -->
+      <section class="section" id="selected" style="padding-top: 0;">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <p class="section__kicker">Featured Selection</p>
+              <h2>The Opening Edit.</h2>
+            </div>
+            <a class="btn btn--ghost btn--small" href="products.html">
+              View All 60 Objects <i data-lucide="arrow-right"></i>
+            </a>
+          </div>
+          <div class="product-grid" id="featured-grid"></div>
+        </div>
+      </section>
+
+      <!-- Feature Spotlight (Field Note) -->
+      <section class="section" style="padding-top: 0;">
+        <div class="container">
+          <article class="feature-spotlight">
+            <div class="feature-spotlight__grid">
+              <div class="feature-spotlight__media">
+                <img src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1400&q=80" alt="Pulse Portable Speaker" />
+                <!-- Hotspot 1 -->
+                <div class="feature-spotlight__hotspot" style="top:35%;left:45%;" title="Acoustic mesh unibody">
+                  <div class="inner-dot"></div>
+                </div>
+                <!-- Hotspot 2 -->
+                <div class="feature-spotlight__hotspot" style="bottom:25%;right:35%;" title="Dual passive radiators">
+                  <div class="inner-dot"></div>
+                </div>
+              </div>
+              <div class="feature-spotlight__content">
+                <p class="section__kicker">Field Note · Acoustics</p>
+                <h2>Pulse Portable Speaker</h2>
+                <p>Engineered for nomadic clarity. A monolithic aluminum chassis housing dual custom passive radiators, sealed against water and dust with IPX7 certification.</p>
+                <div class="feature-specs-list">
+                  <div class="feature-spec-box">
+                    <strong>24 Hours</strong>
+                    <span>Battery Playtime</span>
+                  </div>
+                  <div class="feature-spec-box">
+                    <strong>IPX7</strong>
+                    <span>Water Resistance</span>
+                  </div>
+                  <div class="feature-spec-box">
+                    <strong>30W RMS</strong>
+                    <span>Acoustic Output</span>
+                  </div>
+                  <div class="feature-spec-box">
+                    <strong>Bluetooth 5.3</strong>
+                    <span>Multipoint Sync</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                  <button class="btn btn--primary" type="button" data-add-to-cart="prod-005">
+                    <i data-lucide="shopping-bag"></i> Add Pulse · ₹4,199
+                  </button>
+                  <a class="btn btn--ghost" href="product.html?id=prod-005">
+                    Detailed Overview <i data-lucide="arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Why CloudCart Architecture -->
+      <section class="section" id="why" style="padding-top: 0;">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <p class="section__kicker">Engineering Foundation</p>
+              <h2>Designed for the Modern Cloud Stack.</h2>
+            </div>
+            <p class="section__subtitle">A static edge storefront backed by serverless microservices for optimal speed and reliability.</p>
+          </div>
+          <div class="why-grid">
+            <article class="why-card">
+              <div class="icon-box"><i data-lucide="layers"></i></div>
+              <h3>Zero-Latency S3 Edge</h3>
+              <p>Pure static HTML, CSS, and modern ES6 modules. Delivers sub-100ms first paint times directly via Amazon CloudFront edge nodes.</p>
+            </article>
+            <article class="why-card">
+              <div class="icon-box"><i data-lucide="cpu"></i></div>
+              <h3>Isolated Microservices</h3>
+              <p>Serverless AWS Lambda functions handle catalog lookups, cart persistence, and order processing with on-demand auto-scaling.</p>
+            </article>
+            <article class="why-card">
+              <div class="icon-box"><i data-lucide="shield-alert"></i></div>
+              <h3>Atomic Concurrency</h3>
+              <p>DynamoDB conditional expressions guarantee inventory accuracy and prevent overselling during high-concurrency product drops.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIP Studio Dispatch -->
+      <section class="section" style="padding-top: 0;">
+        <div class="container">
+          <div class="dispatch-banner">
+            <div class="dispatch-copy">
+              <p class="section__kicker">Studio Access</p>
+              <h2>Join the CloudCart Dispatch.</h2>
+              <p>Early hardware announcements, firmware notes, and behind-the-scenes teardowns from our industrial design lab.</p>
+            </div>
+            <form class="dispatch-form" id="newsletter-form" novalidate>
+              <input class="input" id="newsletter-email" name="email" type="email" placeholder="client@studio.com" required />
+              <button class="btn btn--primary" type="submit">Subscribe</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

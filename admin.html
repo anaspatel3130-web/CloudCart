@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Operations Console — CloudCart</title>
+  <meta name="description" content="Operations dashboard for inventory management, stock monitoring, and order auditing." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="admin">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <div class="container">
+        <header class="page-hero">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;">
+            <div>
+              <p class="section__kicker">Operations Console</p>
+              <h1>Hardware Operations</h1>
+              <p class="lede">Local catalog mutations, dynamic stock adjusters, and serverless order tracking sandbox. Non-destructive browser state.</p>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn--ghost btn--small" id="btn-reset-demo" type="button">
+                <i data-lucide="rotate-ccw"></i> Reset Demo Data
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Top KPIs Metric Cards -->
+        <div class="admin-stats-grid" id="admin-stats"></div>
+
+        <!-- AI Demand & Inventory Restock Intelligence Panel -->
+        <section class="admin-ai-insights-card" id="admin-ai-insights" style="background:linear-gradient(135deg, rgba(157,255,20,0.04) 0%, rgba(0,240,255,0.03) 100%), var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:32px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--neon-glow-soft);border:1px solid var(--neon);color:var(--neon);display:grid;place-items:center;">
+                <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+              </div>
+              <div>
+                <h3 style="font-size:1.15rem;font-family:var(--font-heading);margin:0;">Aether Predictive Inventory Intelligence</h3>
+                <span style="font-size:0.75rem;color:var(--neon);font-family:var(--font-mono);letter-spacing:0.05em;">AUTONOMOUS RESTOCK RADAR · 60 HARDWARE SKUS</span>
+              </div>
+            </div>
+            <div id="ai-inventory-health-pill" style="font-family:var(--font-mono);font-size:0.8rem;padding:4px 12px;border-radius:var(--radius-full);background:rgba(255,255,255,0.04);border:1px solid var(--border);">
+              Health: <strong id="ai-health-pct" style="color:var(--neon);">98%</strong>
+            </div>
+          </div>
+          <p id="ai-exec-summary" style="font-size:0.92rem;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;"></p>
+          <div id="ai-restock-chips" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+        </section>
+
+        <!-- Master Layout -->
+        <div class="admin-layout-grid">
+          <!-- Inventory Table Section -->
+          <section class="admin-table-container">
+            <div class="admin-table-toolbar">
+              <div class="search-input-wrap" style="max-width:320px;">
+                <i data-lucide="search"></i>
+                <input class="input" id="admin-search" type="search" placeholder="Filter inventory..." style="height:40px;font-size:0.85rem;" />
+              </div>
+              <span style="font-size:0.78rem;color:var(--text-tertiary);" id="admin-table-count">10 SKUs registered</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Object</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Quick Adjust</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Side Panel: Add/Edit Product & Orders Feed -->
+          <aside style="display:flex;flex-direction:column;gap:24px;">
+            <!-- Product Form Card -->
+            <form class="summary-card" id="product-form" novalidate style="position:static;padding:24px;">
+              <h3 id="form-title" style="font-size:1.25rem;margin-bottom:16px;">Add New Hardware Object</h3>
+              <input type="hidden" id="field-original-id" />
+
+              <div class="field">
+                <label for="field-id">Hardware ID</label>
+                <input class="input" id="field-id" name="id" placeholder="Auto-generated if blank (e.g. prod-011)" />
+              </div>
+
+              <div class="field">
+                <label for="field-name">Object Title *</label>
+                <input class="input" id="field-name" name="name" placeholder="Aether Pro Headphones" required />
+              </div>
+
+              <div class="field">
+                <label for="field-tagline">Studio Tagline</label>
+                <input class="input" id="field-tagline" name="tagline" placeholder="Bespoke planar acoustic drivers." />
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field">
+                  <label for="field-price">Price (INR) *</label>
+                  <input class="input" id="field-price" name="price" type="number" min="1" step="1" required placeholder="8999" />
+                </div>
+                <div class="field">
+                  <label for="field-stock">Stock Units *</label>
+                  <input class="input" id="field-stock" name="stock" type="number" min="0" step="1" required placeholder="12" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="field-category">Ecosystem Category *</label>
+                <select class="select" id="field-category" required>
+                  <option value="">Select Category</option>
+                  <option>Audio & Acoustics</option>
+                  <option>Neural Wearables</option>
+                  <option>Quantum Displays</option>
+                  <option>Cybernetics</option>
+                  <option>Studio Ergonomics</option>
+                  <option>Edge Compute</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="field-image">Image URL (Unsplash or CDN)</label>
+                <input class="input" id="field-image" name="image" type="url" placeholder="https://" />
+              </div>
+
+              <!-- Live Image Preview -->
+              <div id="form-img-preview" style="display:none;align-items:center;gap:12px;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.02);border-radius:var(--radius-sm);border:1px solid var(--border);">
+                <div style="width:40px;height:40px;border-radius:var(--radius-xs);overflow:hidden;background:#000;">
+                  <img id="form-preview-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;" />
+                </div>
+                <span style="font-size:0.75rem;color:var(--text-tertiary);">Preview active</span>
+              </div>
+
+              <div class="field">
+                <label for="field-desc">Description</label>
+                <textarea class="textarea" id="field-desc" name="description" placeholder="Acoustic characteristics, design story..."></textarea>
+              </div>
+
+              <p class="field-error" id="form-error" style="margin-bottom:12px;"></p>
+
+              <div style="display:flex;gap:10px;">
+                <button class="btn btn--primary" type="submit" style="flex:1;">Save Hardware</button>
+                <button class="btn btn--ghost" id="reset-form" type="button">Reset</button>
+              </div>
+            </form>
+
+            <!-- Orders Activity Feed -->
+            <section class="summary-card" style="position:static;padding:24px;">
+              <h3 style="font-size:1.15rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="receipt"></i> Recent Orders Feed
+              </h3>
+              <div class="orders-feed-list" id="recent-orders"></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

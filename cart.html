@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Bag — CloudCart</title>
+  <meta name="description" content="Review your selected CloudCart hardware objects and proceed to secure checkout." />
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body data-page="cart">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page-shell">
+    <header id="site-header"></header>
+
+    <main id="main" class="main-content">
+      <div class="container">
+        <header class="page-hero">
+          <p class="section__kicker">Shopping Bag</p>
+          <h1>Review Your Order</h1>
+          <p class="lede">All quantities and preferences remain persisted in your browser session. Transparent pricing with complimentary express delivery across India.</p>
+        </header>
+
+        <!-- Free Delivery Progress Meter -->
+        <div class="shipping-meter" id="shipping-meter" hidden>
+          <div class="shipping-meter__text">
+            <span id="meter-status">Add ₹2,000 more to unlock Free Priority Express Air Shipping</span>
+            <span class="highlight" id="meter-percent">60%</span>
+          </div>
+          <div class="shipping-meter__bar-bg">
+            <div class="shipping-meter__bar-fill" id="meter-fill" style="width: 60%;"></div>
+          </div>
+        </div>
+
+        <div class="cart-layout">
+          <!-- Items List Column -->
+          <div id="cart-items"></div>
+
+          <!-- Sticky Order Summary Column -->
+          <aside class="summary-card" id="cart-summary" hidden>
+            <h2>Order Summary</h2>
+            
+            <div class="summary__row">
+              <span>Items Total</span>
+              <span id="summary-subtotal">₹0</span>
+            </div>
+
+            <div class="summary__row">
+              <span>Express Delivery</span>
+              <span style="color:var(--neon);" id="summary-shipping">FREE</span>
+            </div>
+
+            <div class="summary__row summary__row--discount" id="discount-row" hidden>
+              <span id="discount-label">VIP Voucher Discount</span>
+              <span id="summary-discount">-₹0</span>
+            </div>
+
+            <div class="summary__row">
+              <span>Tax (GST Included)</span>
+              <span style="color:var(--text-tertiary);">₹0 (18%)</span>
+            </div>
+
+            <div class="summary__row summary__row--total">
+              <span>Total Due</span>
+              <span id="summary-total">₹0</span>
+            </div>
+
+            <!-- Promo Code Input -->
+            <div class="voucher-input-row">
+              <input class="input" id="voucher-code" type="text" placeholder="Promo code (e.g. CLOUDCART10)" style="height:44px;font-size:0.85rem;" />
+              <button class="btn btn--ghost btn--small" id="apply-voucher" type="button" style="height:44px;">Apply</button>
+            </div>
+            <p id="voucher-message" style="font-size:0.75rem;margin-top:-12px;margin-bottom:16px;"></p>
+
+            <a class="btn btn--primary btn--block btn--large" id="proceed-checkout-btn" href="checkout.html">
+              Proceed to Checkout <i data-lucide="arrow-right"></i>
+            </a>
+
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;font-size:0.76rem;color:var(--text-tertiary);">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <i data-lucide="lock" style="width:14px;height:14px;color:var(--neon);"></i>
+                <span>256-bit SSL encrypted checkout</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <i data-lucide="check" style="width:14px;height:14px;color:var(--neon);"></i>
+                <span>Instant atomic inventory reservation</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <!-- AI Smart Cart Recommendations -->
+        <section class="section" id="ai-smart-cart-section" style="margin-top: 48px; border-top: 1px solid var(--border); padding-top: 40px;" hidden>
+          <div class="section__head">
+            <div>
+              <p class="section__kicker"><i data-lucide="sparkles" style="width:14px;height:14px;display:inline-block;vertical-align:middle;color:var(--neon);"></i> Aether Smart Cart Insights</p>
+              <h2>Recommended Complements</h2>
+              <p id="ai-cart-advice" style="color:var(--text-secondary);font-size:0.92rem;margin-top:4px;"></p>
+            </div>
+          </div>
+          <div class="product-grid" id="ai-cart-recommendations-grid"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer" id="site-footer"></footer>
+  </div>
+
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>
