@@ -1,0 +1,20 @@
+version = 0.1
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+region = "ap-south-1"
+
+[default.deploy.parameters]
+stack_name = "cloudcart"
+region = "ap-south-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+parameter_overrides = "AllowedOrigin=\"http://localhost:8080\" AuthMode=\"demo\" DeployStage=\"dev\" InventoryMonitorEnabled=\"false\" EnableInventoryAlerts=\"false\" EnableFrontendHosting=\"false\" LowStockThreshold=\"5\" InventoryMonitorSchedule=\"rate(1 day)\" TableNamePrefix=\"CloudCart\" LogRetentionDays=\"14\""
+
+# Copy this file to samconfig.toml (gitignored) after you choose a stack name
+# and region. Never put DemoAdminKey, access keys, or account secrets here.

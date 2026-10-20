@@ -1,0 +1,25 @@
+{
+  "name": "cloudcart",
+  "version": "1.2.0",
+  "description": "Production-grade AI-powered serverless e-commerce platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test backend/tests/*.test.js automation/*.test.js",
+    "test:backend": "node --test backend/tests/*.test.js",
+    "test:automation": "node --test automation/*.test.js",
+    "lint:frontend": "node -c frontend/js/*.js",
+    "dev": "python -m http.server 3000 --directory frontend"
+  },
+  "keywords": [
+    "serverless",
+    "ecommerce",
+    "aws-lambda",
+    "dynamodb",
+    "eventbridge",
+    "ai-assistant",
+    "stripe-ui"
+  ],
+  "author": "CloudCart Studio",
+  "license": "MIT"
+}

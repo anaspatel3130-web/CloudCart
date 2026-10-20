@@ -1,0 +1,113 @@
+[
+  {
+    "id": "prod-001",
+    "name": "Aether Wireless Headphones",
+    "description": "Closed-back wireless headphones with a long-life battery and a quiet, focused listening profile.",
+    "price": 8999,
+    "previousPrice": 10999,
+    "category": "Audio",
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+    "stock": 14,
+    "featured": true,
+    "newArrival": true,
+    "createdAt": "2026-01-10T00:00:00.000Z"
+  },
+  {
+    "id": "prod-002",
+    "name": "Graphite Mechanical Keyboard",
+    "description": "Compact 75% layout with hot-swappable switches and a low-profile aluminium frame.",
+    "price": 6499,
+    "category": "Desk Setup",
+    "image": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=1200&q=80",
+    "stock": 3,
+    "featured": true,
+    "newArrival": true,
+    "createdAt": "2026-01-11T00:00:00.000Z"
+  },
+  {
+    "id": "prod-003",
+    "name": "Precision Wireless Mouse",
+    "description": "Low-latency sensor, quiet clicks, and a shape designed for all-day desk work.",
+    "price": 2499,
+    "previousPrice": 2999,
+    "category": "Accessories",
+    "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1200&q=80",
+    "stock": 22,
+    "featured": true,
+    "createdAt": "2026-01-12T00:00:00.000Z"
+  },
+  {
+    "id": "prod-004",
+    "name": "Orbit USB-C Hub",
+    "description": "Seven-port aluminium hub for displays, storage, and everyday charging from a single cable.",
+    "price": 3299,
+    "category": "Accessories",
+    "image": "https://images.unsplash.com/photo-1618384887929-16ec33cad9ea?auto=format&fit=crop&w=1200&q=80",
+    "stock": 18,
+    "featured": true,
+    "createdAt": "2026-01-13T00:00:00.000Z"
+  },
+  {
+    "id": "prod-005",
+    "name": "Pulse Portable Speaker",
+    "description": "Travel-ready speaker with a controlled low end and a durable, weather-resistant shell.",
+    "price": 4199,
+    "category": "Audio",
+    "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=1200&q=80",
+    "stock": 5,
+    "featured": true,
+    "newArrival": true,
+    "createdAt": "2026-01-14T00:00:00.000Z"
+  },
+  {
+    "id": "prod-006",
+    "name": "Halo Desk Lamp",
+    "description": "Adjustable task lamp with warm-to-cool light and a stable, compact base.",
+    "price": 2899,
+    "category": "Desk Setup",
+    "image": "https://images.unsplash.com/photo-1507473887607-a6e529184d03?auto=format&fit=crop&w=1200&q=80",
+    "stock": 11,
+    "createdAt": "2026-01-15T00:00:00.000Z"
+  },
+  {
+    "id": "prod-007",
+    "name": "Lift Laptop Stand",
+    "description": "Angled aluminium stand that raises a laptop for a cleaner, more upright desk posture.",
+    "price": 1999,
+    "category": "Desk Setup",
+    "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1200&q=80",
+    "stock": 27,
+    "createdAt": "2026-01-16T00:00:00.000Z"
+  },
+  {
+    "id": "prod-008",
+    "name": "Charge Compact Power Bank",
+    "description": "10,000 mAh USB-C power bank sized for a bag, with pass-through charging for daily carry.",
+    "price": 1499,
+    "category": "Mobile Essentials",
+    "image": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=1200&q=80",
+    "stock": 4,
+    "createdAt": "2026-01-17T00:00:00.000Z"
+  },
+  {
+    "id": "prod-009",
+    "name": "Nimbus True Wireless Earbuds",
+    "description": "Compact earbuds with a charging case and a balanced, commuter-friendly sound signature.",
+    "price": 3799,
+    "category": "Audio",
+    "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=1200&q=80",
+    "stock": 0,
+    "createdAt": "2026-01-18T00:00:00.000Z"
+  },
+  {
+    "id": "prod-010",
+    "name": "Arc Magnetic Phone Stand",
+    "description": "Fold-flat stand for desks and bedside tables. Holds a phone in portrait or landscape.",
+    "price": 799,
+    "category": "Mobile Essentials",
+    "image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80",
+    "stock": 36,
+    "newArrival": true,
+    "createdAt": "2026-01-19T00:00:00.000Z"
+  }
+]

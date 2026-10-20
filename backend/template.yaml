@@ -1,0 +1,667 @@
+# CloudCart serverless backend + shared data plane
+# Coordinates API Gateway HTTP API, Lambda, DynamoDB, the existing
+# inventory-monitor (automation/), and optional private S3 + CloudFront hosting.
+# Do not deploy without explicit approval. This file does not create AWS
+# resources until someone runs `sam deploy`.
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  CloudCart — Serverless E-Commerce Platform
+  HTTP API + Lambda + DynamoDB + scheduled inventory monitor
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Default: http://localhost:8080
+    Description: Single browser origin allowed by CORS (local server, S3 website URL, or CloudFront URL)
+
+  AuthMode:
+    Type: String
+    Default: demo
+    AllowedValues:
+      - demo
+      - jwt
+    Description: demo uses X-CloudCart-User-Id; jwt requires Cognito JWT claims (and a gateway authorizer when pool IDs are set)
+
+  DeployStage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: prod fails closed on admin routes unless AuthMode=jwt
+
+  DemoAdminKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: Development-only value for X-CloudCart-Admin-Key. Leave empty in production.
+
+  CognitoUserPoolId:
+    Type: String
+    Default: ""
+    Description: Optional existing Cognito user pool ID (this stack does not create a user pool)
+
+  CognitoUserPoolClientId:
+    Type: String
+    Default: ""
+    Description: Optional existing Cognito app client ID (JWT audience)
+
+  TableNamePrefix:
+    Type: String
+    Default: CloudCart
+    Description: Prefix for DynamoDB table names (must be unique in the account and region)
+
+  InventoryMonitorSchedule:
+    Type: String
+    Default: rate(1 day)
+    Description: EventBridge schedule for inventory monitoring (rate or cron)
+
+  LowStockThreshold:
+    Type: Number
+    Default: 5
+    MinValue: 0
+    Description: Products with stock > 0 and stock <= this value are LOW_STOCK
+
+  InventoryMonitorEnabled:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: When true, EventBridge invokes the inventory monitor on the schedule
+
+  EnableInventoryAlerts:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: When true, create an SNS topic and allow the monitor to publish alerts
+
+  EnableFrontendHosting:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: When true, create a private S3 bucket and CloudFront distribution for the static frontend
+
+  FrontendBucketName:
+    Type: String
+    Default: ""
+    Description: Optional globally unique S3 bucket name. Leave empty to let CloudFormation generate one.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90]
+    Description: CloudWatch Logs retention for Lambda log groups (shorter = cheaper)
+
+Conditions:
+  InventoryScheduleEnabled: !Equals [!Ref InventoryMonitorEnabled, "true"]
+  InventoryAlertsEnabled: !Equals [!Ref EnableInventoryAlerts, "true"]
+  FrontendHostingEnabled: !Equals [!Ref EnableFrontendHosting, "true"]
+  HasFrontendBucketName: !Not [!Equals [!Ref FrontendBucketName, ""]]
+  UseJwtAuthorizer: !And
+    - !Equals [!Ref AuthMode, jwt]
+    - !Not [!Equals [!Ref CognitoUserPoolId, ""]]
+    - !Not [!Equals [!Ref CognitoUserPoolClientId, ""]]
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 10
+    MemorySize: 128
+    Architectures:
+      - x86_64
+    Tags:
+      Project: CloudCart
+    Environment:
+      Variables:
+        PRODUCTS_TABLE: !Ref ProductsTable
+        CARTS_TABLE: !Ref CartsTable
+        ORDERS_TABLE: !Ref OrdersTable
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
+        AUTH_MODE: !Ref AuthMode
+        STAGE: !Ref DeployStage
+        DEFAULT_DEMO_USER_ID: demo-user
+
+Resources:
+  CloudCartApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: Prod
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-CloudCart-User-Id
+          - X-CloudCart-Admin-Key
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - OPTIONS
+        MaxAge: 600
+      Auth: !If
+        - UseJwtAuthorizer
+        - Authorizers:
+            JwtAuthorizer:
+              IdentitySource: $request.header.Authorization
+              JwtConfiguration:
+                issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${CognitoUserPoolId}
+                audience:
+                  - !Ref CognitoUserPoolClientId
+          DefaultAuthorizer: NONE
+        - !Ref AWS::NoValue
+      Tags:
+        Project: CloudCart
+
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${TableNamePrefix}-Products
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  CartsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${TableNamePrefix}-Carts
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${TableNamePrefix}-Orders
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserOrdersIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  AutomationStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${TableNamePrefix}-AutomationState
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  ProductsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-products
+      RetentionInDays: !Ref LogRetentionDays
+
+  CartLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-cart
+      RetentionInDays: !Ref LogRetentionDays
+
+  OrdersLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-orders
+      RetentionInDays: !Ref LogRetentionDays
+
+  AdminLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-admin
+      RetentionInDays: !Ref LogRetentionDays
+
+  InventoryMonitorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-inventory-monitor
+      RetentionInDays: !Ref LogRetentionDays
+
+  AiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-ai
+      RetentionInDays: !Ref LogRetentionDays
+
+  ProductsFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: ProductsLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-products
+      CodeUri: .
+      Handler: src/handlers/products.handler
+      Description: GET /products and GET /products/{id}
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        ListProducts:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /products
+            Method: GET
+        GetProduct:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /products/{id}
+            Method: GET
+
+  CartFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: CartLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-cart
+      CodeUri: .
+      Handler: src/handlers/cart.handler
+      Description: GET /cart and POST /cart
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ProductsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CartsTable
+      Events:
+        GetCart:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /cart
+            Method: GET
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+        UpdateCart:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /cart
+            Method: POST
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+
+  OrdersFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: OrdersLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-orders
+      CodeUri: .
+      Handler: src/handlers/orders.handler
+      Description: Checkout and order history
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:ConditionCheckItem
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt ProductsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:Query
+                - dynamodb:ConditionCheckItem
+                - dynamodb:TransactWriteItems
+              Resource:
+                - !GetAtt OrdersTable.Arn
+                - !Sub "${OrdersTable.Arn}/index/*"
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:ConditionCheckItem
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt CartsTable.Arn
+      Events:
+        CreateOrder:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /orders
+            Method: POST
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+        ListOrders:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /orders
+            Method: GET
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+        GetOrder:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /orders/{id}
+            Method: GET
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+
+  AdminFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: AdminLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-admin
+      CodeUri: .
+      Handler: src/handlers/admin.handler
+      Description: Inventory and order-status admin routes (authorized in application code)
+      Environment:
+        Variables:
+          DEMO_ADMIN_KEY: !Ref DemoAdminKey
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:Scan
+                - dynamodb:UpdateItem
+              Resource: !GetAtt ProductsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+              Resource: !GetAtt OrdersTable.Arn
+      Events:
+        GetInventory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /admin/inventory
+            Method: GET
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+        PatchStock:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /admin/products/{id}/stock
+            Method: PATCH
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+        PatchOrderStatus:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /admin/orders/{id}/status
+            Method: PATCH
+            Auth:
+              Authorizer: !If [UseJwtAuthorizer, JwtAuthorizer, NONE]
+
+  AiFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: AiLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-ai
+      CodeUri: .
+      Handler: src/handlers/ai.handler
+      Description: Natural-language shopping assistant & contextual recommendations
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        AiChat:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /ai/chat
+            Method: POST
+        AiRecommendations:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CloudCartApi
+            Path: /ai/recommendations
+            Method: POST
+
+  InventoryAlertTopic:
+    Type: AWS::SNS::Topic
+    Condition: InventoryAlertsEnabled
+    Properties:
+      TopicName: !Sub ${TableNamePrefix}-InventoryAlerts
+      DisplayName: CloudCart inventory alerts
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  InventoryMonitorFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: InventoryMonitorLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-inventory-monitor
+      CodeUri: ../automation
+      Handler: inventory-monitor.handler
+      Timeout: 30
+      Description: Scheduled inventory classification (low / out of stock)
+      Environment:
+        Variables:
+          PRODUCTS_TABLE: !Ref ProductsTable
+          LOW_STOCK_THRESHOLD: !Ref LowStockThreshold
+          AUTOMATION_STATE_TABLE: !Ref AutomationStateTable
+          ALERT_TOPIC_ARN: !If
+            - InventoryAlertsEnabled
+            - !Ref InventoryAlertTopic
+            - ""
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ProductsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource: !GetAtt AutomationStateTable.Arn
+        - !If
+          - InventoryAlertsEnabled
+          - SNSPublishMessagePolicy:
+              TopicName: !GetAtt InventoryAlertTopic.TopicName
+          - !Ref AWS::NoValue
+      Events:
+        ScheduledCheck:
+          Type: Schedule
+          Properties:
+            Name: !Sub ${AWS::StackName}-inventory-monitor
+            Schedule: !Ref InventoryMonitorSchedule
+            Description: Configurable inventory check (default once per day, disabled until enabled)
+            Enabled: !If [InventoryScheduleEnabled, true, false]
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Condition: FrontendHostingEnabled
+    Properties:
+      BucketName: !If
+        - HasFrontendBucketName
+        - !Ref FrontendBucketName
+        - !Ref AWS::NoValue
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      Tags:
+        - Key: Project
+          Value: CloudCart
+
+  FrontendOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: FrontendHostingEnabled
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${AWS::StackName}-frontend-oac
+        Description: CloudCart private S3 origin access
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  FrontendDistribution:
+    Type: AWS::CloudFront::Distribution
+    Condition: FrontendHostingEnabled
+    Properties:
+      DistributionConfig:
+        Comment: CloudCart static frontend
+        Enabled: true
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+        DefaultRootObject: index.html
+        Origins:
+          - Id: FrontendS3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !Ref FrontendOriginAccessControl
+        DefaultCacheBehavior:
+          TargetOriginId: FrontendS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        Tags:
+          - Key: Project
+            Value: CloudCart
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: FrontendHostingEnabled
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${FrontendBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${FrontendDistribution}
+
+Outputs:
+  ApiUrl:
+    Description: HTTP API base URL for frontend apiBaseUrl (no trailing slash required)
+    Value: !Sub "https://${CloudCartApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+
+  Region:
+    Description: AWS region of this stack
+    Value: !Ref AWS::Region
+
+  StackName:
+    Description: CloudFormation stack name
+    Value: !Ref AWS::StackName
+
+  ProductsTableName:
+    Description: Products DynamoDB table
+    Value: !Ref ProductsTable
+
+  CartsTableName:
+    Description: Carts DynamoDB table
+    Value: !Ref CartsTable
+
+  OrdersTableName:
+    Description: Orders DynamoDB table
+    Value: !Ref OrdersTable
+
+  AutomationStateTableName:
+    Description: Inventory-monitor fingerprint table
+    Value: !Ref AutomationStateTable
+
+  ProductsFunctionName:
+    Description: Products Lambda name
+    Value: !Ref ProductsFunction
+
+  InventoryMonitorFunctionName:
+    Description: Inventory monitor Lambda name (use this for aws lambda invoke)
+    Value: !Ref InventoryMonitorFunction
+
+  InventoryMonitorFunctionArn:
+    Description: Inventory monitor Lambda ARN
+    Value: !GetAtt InventoryMonitorFunction.Arn
+
+  InventoryAlertTopicArn:
+    Condition: InventoryAlertsEnabled
+    Description: Confirm email subscriptions on this topic before expecting alert mail
+    Value: !Ref InventoryAlertTopic
+
+  FrontendBucketName:
+    Condition: FrontendHostingEnabled
+    Description: Private S3 bucket for static frontend files
+    Value: !Ref FrontendBucket
+
+  CloudFrontUrl:
+    Condition: FrontendHostingEnabled
+    Description: HTTPS frontend URL. Set AllowedOrigin to this origin on the next deploy.
+    Value: !Sub https://${FrontendDistribution.DomainName}
+
+  CloudFrontDistributionId:
+    Condition: FrontendHostingEnabled
+    Description: Use with aws cloudfront create-invalidation after uploading files
+    Value: !Ref FrontendDistribution
