@@ -28,6 +28,10 @@
       "dest": "/frontend/product.html"
     },
     {
+      "src": "/wishlist",
+      "dest": "/frontend/wishlist.html"
+    },
+    {
       "src": "/cart",
       "dest": "/frontend/cart.html"
     },
